@@ -1,8 +1,9 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by hook_hangars.rc
+// Used by hook_bmuse.rc
+//
 
-// Valeurs par défaut suivantes des nouveaux objets
+// Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS

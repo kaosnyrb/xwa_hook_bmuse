@@ -1,0 +1,17 @@
+
+*.dll
+*.exp
+*.ilk
+*.lib
+*.pdb
+*.obj
+*.res
+*.tlog
+*.log
+*.idb
+.vs/xwa_hook_bmuse/v16/.suo
+*.db
+*.opendb
+Release/Hook_Bmuse.iobj
+*.ipdb
+*.ipch
