@@ -104,7 +104,7 @@ int testhook(int* params)
 	const char* xwaMissionFileName = (const char*)0x06002E8;
 
 	int* musicval = (int*)0x694070;
-	*musicval = 1135;
+	*musicval = 0x46F;
 //	fprintf(fp, "playing music %d \n", *musicval);
 	((void(*)())0x0049ADE0)();//plays music
 	fclose(fp);
