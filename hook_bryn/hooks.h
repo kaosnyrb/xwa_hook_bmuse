@@ -13,7 +13,7 @@
 //4F51C0
 static const HookFunction g_hookFunctions[] =
 {
-	{ 0x592C32, testhook },
+	{ 0x4F526C, testhook },
 };
 
 // Line to replace, original value, new value
@@ -21,9 +21,10 @@ static const HookFunction g_hookFunctions[] =
 //mov     eax, dword_694070
 // 0x0F4667 E8745BFAFF call    sub_49ADE0
 //call    something?
+//0x0F4667
 static const HookPatchItem g_test[] =
 {
-	{ 0x0F4667, "E8745BFAFF", "9090909090" },
+	{ 0x0F4667, "E8745BFAFF", "E8B4380B00" },
 };
 
 
