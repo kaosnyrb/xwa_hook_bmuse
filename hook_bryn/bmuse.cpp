@@ -82,31 +82,55 @@ public:
 
 Config g_config;
 
+int timer = 0;
+int timerLength = 10;
+int lasttrack = 0;
+bool logging = true;
+
 int testhook(int* params)
 {
-	//const char* argOpt = (char*)params[0];
-//	const unsigned short argModelIndex = (unsigned short)params[0x60];
-
-//	const auto OptLoad = (int(*)(const char*))0x004CC940;
-	FILE* fp;
+	FILE* fp = 0;
 	errno_t err;
-	if ((err = fopen_s(&fp, "hooklog.txt", "a")) != 0)
+	if (logging)
 	{
-		printf("File was not opened\n");
+		if ((err = fopen_s(&fp, "hooklog.txt", "a")) != 0)
+		{
+			printf("File was not opened\n");
+		}
 	}
 
-	fprintf(fp, "Logging from testhook \n");
-
-	XwaPlayer* xwaPlayers = (XwaPlayer*)0x08B94E0;
-	const XwaObject* XwaObjects = *(XwaObject**)0x007B33C4;
-
-	const int currentPlayerId = *(int*)0x08C1CC8;
-	const char* xwaMissionFileName = (const char*)0x06002E8;
-
-	int* musicval = (int*)0x694070;
-	*musicval = 0x46F;
-//	fprintf(fp, "playing music %d \n", *musicval);
+	int* musicoverride = (int*)0x694070;
+	int* musicstate = (int*)0x9B631C;
+	if (lasttrack == 0)
+	{
+		lasttrack = *musicstate;
+	}
+	else
+	{
+		if (logging) fprintf(fp, "music state %d \n", *musicoverride);
+		if (timer == timerLength)
+		{
+			//When timer is hit we let iMuse choose the next track
+			*musicoverride = 0;
+		}
+		else if (timer > timerLength)
+		{
+			//Then we set the track to whatever iMuse chose
+			lasttrack = *musicstate;
+			if (logging) fprintf(fp, "Timer hit, playing music %d \n", *musicstate);
+			timer = 0;
+		}
+		else
+		{
+			//While we're in the timer don't let iMuse change the music. This should smooth out the track changes
+			*musicoverride = lasttrack;
+		}
+	}
+	timer++;
 	((void(*)())0x0049ADE0)();//plays music
-	fclose(fp);
+	if (logging) {
+		fclose(fp);
+	}
+
 	return 0;
 }
