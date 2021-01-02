@@ -83,9 +83,9 @@ public:
 Config g_config;
 
 int timer = 0;
-int timerLength = 10;
+int timerLength = 30;
 int lasttrack = 0;
-bool logging = true;
+bool logging = false;
 
 int testhook(int* params)
 {
