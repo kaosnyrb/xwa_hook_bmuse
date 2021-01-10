@@ -25,6 +25,9 @@ static const HookFunction g_hookFunctions[] =
 static const HookPatchItem g_test[] =
 {
 	{ 0x0F4667, "E8745BFAFF", "E8B4380B00" },
+	//Breaks the music override function in the Imuse events, meaning events will always play 
+	//(mov     eax, g_iMuseMusicStateOverride => mov     eax, dword_8C1CC8)
+	{ 0x09A00D, "A170406900", "A1C81C8C00" }	
 };
 
 
