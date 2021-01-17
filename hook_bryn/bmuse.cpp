@@ -4,7 +4,6 @@
 #include <fstream>
 #include <map>
 #include <utility>
-
 #pragma pack(push, 1)
 
 struct XwaCraft
@@ -74,13 +73,10 @@ public:
 Config g_config;
 
 int timer = 0;
-int timerLength = 30;
+int timerLength = 60;
 int lasttrack = 0;
 
-int lastplayerPositionX = 0;
-int loadtriggerdistance = 750; //How far the player needs to have moved before I start thinking they may have teleported.
-
-int playerID = -1;
+int checkflag = 0;
 
 bool logging = false;
 
@@ -95,83 +91,50 @@ int testhook(int* params)
 			printf("File was not opened\n");
 		}
 	}
-
 	int* musicoverride = (int*)0x694070;
 	int* musicstate = (int*)0x9B631C;
-	if (lasttrack == 0)
+	int* musicother = (int*)0x9B6318;
+	if (logging) fprintf(fp, "pre music state %d : %d : %d  \n", *musicstate, *musicoverride, *musicother);
+	*musicoverride = 0;
+	//Leave the hanger music alone
+	if (*musicstate != 1102 && *musicstate != 1108 && *musicstate != 1106)
 	{
-		lasttrack = *musicstate;
-	}
-	else
-	{
-		//if (logging) fprintf(fp, "music state %d \n", *musicstate);
-		if (timer == timerLength)
+		if (lasttrack == 0)
 		{
-			//When timer is hit we let iMuse choose the next track
-			*musicoverride = 0;
-		}
-		else if (timer > timerLength)
-		{
-			//Then we set the track to whatever iMuse chose
 			lasttrack = *musicstate;
-			if (logging) fprintf(fp, "Timer hit, playing music %d \n", *musicstate);
-			timer = 0;
 		}
 		else
 		{
-			//While we're in the timer don't let iMuse change the music. This should smooth out the track changes
-			*musicoverride = lasttrack;
-		}
-	}
-	timer++;
-	// check for large changes in player position, assuming this means that a load has taken place
-	const XwaObject* xwaObjects = *(XwaObject**)0x07B33C4;
-	if (playerID == -1)
-	{
-		for (int i = 0; i < 500; i++)
-		{
-			if (xwaObjects[i].PlayerIndex != -1)
+			if (timer == timerLength)
 			{
-				if (logging) fprintf(fp, " %i .PlayerIndex != -1 \n", i);
-				playerID = i;
-				break;
+				//When timer is hit we let iMuse choose the next track
+				*musicoverride = 0;
+			}
+			else if (timer > timerLength)
+			{
+				//Then we set the track to whatever iMuse chose
+				lasttrack = *musicstate;
+				if (logging) fprintf(fp, "Timer hit, playing music %d \n", *musicstate);
+				timer = 0;
+			}
+			else
+			{
+				//While we're in the timer don't let iMuse change the music. This should smooth out the track changes
+				if (*musicstate == 1102 || *musicstate == 1108)
+				{
+					lasttrack = *musicstate;
+				}
+				*musicoverride = lasttrack;
 			}
 		}
-	}
-	if (logging) fprintf(fp, "pos: %i %i \n", xwaObjects[playerID].PositionX, xwaObjects[playerID].PositionY);	
-	if (lastplayerPositionX == 0)
-	{
-		if (xwaObjects[playerID].pMobileObject)
-		{
-			lastplayerPositionX = xwaObjects[playerID].pMobileObject->PositionX;
-		}
+		timer++;
 	}
 	else
 	{
-		int playerPositionX = xwaObjects[playerID].pMobileObject->PositionX;
-		int distance = (playerPositionX - lastplayerPositionX);
-		distance = distance / 100; //Shrink it, don't need that much accuracy.
-		//Square the distance to (makes it always positive)
-		distance = distance * distance;
-		if (logging) fprintf(fp, "distance : %i \n", distance);
-		if (distance > loadtriggerdistance)
-		{
-			if (logging) fprintf(fp, "distance > loadtriggerdistance \n");
-			timer = timerLength;
-			//Make sure the player hasn't changed position in the list, refresh it.
-			for (int i = 0; i < 500; i++)
-			{
-				if (xwaObjects[i].PlayerIndex != -1)
-				{
-					if (logging) fprintf(fp, " %i .PlayerIndex != -1 \n", i);
-					playerID = i;
-					break;
-				}
-			}
-		}
-		lastplayerPositionX = xwaObjects[playerID].pMobileObject->PositionX;
+		if (logging) fprintf(fp, "Filler Tracks... \n");
 	}
-	
+	if (logging) fprintf(fp, "post music state %d : %d : %d \n", *musicstate, *musicoverride, *musicother);
+	musicstate = musicoverride;
 	((void(*)())0x0049ADE0)();//plays music
 	if (logging) {
 		fclose(fp);
